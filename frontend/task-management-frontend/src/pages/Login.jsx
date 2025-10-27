@@ -72,7 +72,7 @@ const Login = () => {
                 <input
                   type="checkbox"
                   checked={rememberMe}
-                //   onChange={() => setRememberMe(!rememberMe)}
+                  onChange={() => setRememberMe(!rememberMe)}
                   className="form-checkbox text-indigo-600 rounded focus:ring-0 mr-2"
                 />
                 Remember me
