@@ -4,11 +4,14 @@ import UpdateTask from "./UpdateTask";
 
 const Home = () => {
   const [tasks, setTasks] = useState([]);
+  const [filteredTasks, setFilteredTasks] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedTask, setSelectedTask] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
   const [updateModal, setUpdateModal] = useState(false);
   const [taskToUpdate, setTaskToUpdate] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const fetchTasks = async () => {
     try {
@@ -16,9 +19,21 @@ const Home = () => {
         `${import.meta.env.VITE_API_BASE_URL}/user/ReadTask`
       );
       setTasks(response.data.data);
+      setFilteredTasks(response.data.data);
     } catch (error) {
       console.log("Error fetching tasks:", error);
     }
+  };
+
+  const handleSearch = (e) => {
+    const value = e.target.value.toLowerCase();
+    setSearchTerm(value);
+    const filtered = tasks.filter(
+      (task) =>
+        task.title.toLowerCase().includes(value) ||
+        task.description.toLowerCase().includes(value)
+    );
+    setFilteredTasks(filtered);
   };
 
   const handleDelete = async (id) => {
@@ -26,7 +41,9 @@ const Home = () => {
       await axios.post(`${import.meta.env.VITE_API_BASE_URL}/user/DeleteTask`, {
         id,
       });
-      setTasks(tasks.filter((task) => task._id !== id));
+      const updatedTasks = tasks.filter((task) => task._id !== id);
+      setTasks(updatedTasks);
+      setFilteredTasks(updatedTasks);
       setConfirmDeleteId(null);
     } catch (error) {
       console.log("Error deleting task:", error);
@@ -35,8 +52,11 @@ const Home = () => {
 
   const handleDeleteAll = async () => {
     try {
-      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/user/DeleteTask`);
+      await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/user/DeleteTask`
+      );
       setTasks([]);
+      setFilteredTasks([]);
       setConfirmDeleteAll(false);
     } catch (error) {
       console.log("Error deleting all tasks:", error);
@@ -49,13 +69,16 @@ const Home = () => {
         `${import.meta.env.VITE_API_BASE_URL}/user/UpdateTask`,
         updatedTask
       );
-      setTasks((prev) =>
-        prev.map((t) =>
-          t._id === updatedTask.id ? { ...t, ...updatedTask } : t
-        )
+      const updatedTasks = tasks.map((t) =>
+        t._id === updatedTask.id ? { ...t, ...updatedTask } : t
       );
+      setTasks(updatedTasks);
+      setFilteredTasks(updatedTasks);
       setUpdateModal(false);
       setTaskToUpdate(null);
+
+      setSuccessMessage("Task updated successfully!");
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
       console.log("Error updating task:", error);
     }
@@ -67,22 +90,37 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex flex-col items-center p-6">
+      {successMessage && (
+        <div className="fixed top-5 z-50 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg animate-fadeIn">
+          {successMessage}
+        </div>
+      )}
+
       <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl p-8 w-full max-w-3xl">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
           <h1 className="text-3xl font-bold text-gray-800">Your Tasks</h1>
-          <button
-            onClick={() => setConfirmDeleteAll(true)}
-            className="bg-red-500 text-white px-4 py-2 rounded-xl hover:bg-red-600 transition"
-          >
-            Delete All
-          </button>
+          <div className="flex gap-3 w-full md:w-auto">
+            <input
+              type="text"
+              placeholder="Search tasks..."
+              value={searchTerm}
+              onChange={handleSearch}
+              className="border border-gray-300 rounded-xl px-4 py-2 w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <button
+              onClick={() => setConfirmDeleteAll(true)}
+              className="bg-red-500 text-white px-4 py-2 rounded-xl hover:bg-red-600 transition"
+            >
+              Delete All
+            </button>
+          </div>
         </div>
 
-        {tasks.length === 0 ? (
+        {filteredTasks.length === 0 ? (
           <p className="text-center text-gray-500">No tasks available.</p>
         ) : (
           <ul className="space-y-4">
-            {tasks.map((task) => (
+            {filteredTasks.map((task) => (
               <li
                 key={task._id}
                 className="flex justify-between items-center bg-gray-100 p-4 rounded-xl shadow-sm"
@@ -171,10 +209,7 @@ const Home = () => {
             >
               ✕
             </button>
-            <UpdateTask
-              onUpdate={handleUpdate}
-              existingTask={taskToUpdate}
-            />
+            <UpdateTask onUpdate={handleUpdate} existingTask={taskToUpdate} />
           </div>
         </div>
       )}
