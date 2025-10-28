@@ -17,7 +17,6 @@ const Navbar = () => {
           <div className="hidden md:flex space-x-6">
             <Link to="/home" className="text-white hover:text-gray-200 transition duration-200">Home</Link>
             <Link to="/create-task" className="text-white hover:text-gray-200 transition duration-200">Create</Link>
-            <Link to="/update-task" className="text-white hover:text-gray-200 transition duration-200">Update</Link>
           </div>
 
           <div className="md:hidden flex items-center">
@@ -38,9 +37,8 @@ const Navbar = () => {
 
       {menuOpen && (
         <div className="md:hidden bg-indigo-700">
-          <Link to="/" className="block px-4 py-2 text-white hover:bg-indigo-500" onClick={() => setMenuOpen(false)}>Home</Link>
+          <Link to="/home" className="block px-4 py-2 text-white hover:bg-indigo-500" onClick={() => setMenuOpen(false)}>Home</Link>
           <Link to="/create-task" className="block px-4 py-2 text-white hover:bg-indigo-500" onClick={() => setMenuOpen(false)}>Create</Link>
-          <Link to="/update-task" className="block px-4 py-2 text-white hover:bg-indigo-500" onClick={() => setMenuOpen(false)}>Update</Link>
         </div>
       )}
     </nav>

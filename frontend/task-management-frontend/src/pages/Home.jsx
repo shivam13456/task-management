@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import UpdateTask from "./UpdateTask";
 
 const Home = () => {
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
+  const [updateModal, setUpdateModal] = useState(false);
+  const [taskToUpdate, setTaskToUpdate] = useState(null);
 
   const fetchTasks = async () => {
     try {
@@ -14,27 +17,47 @@ const Home = () => {
       );
       setTasks(response.data.data);
     } catch (error) {
-      console.error("Error fetching tasks:", error);
+      console.log("Error fetching tasks:", error);
     }
   };
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/tasks/${id}`);
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/user/DeleteTask`, {
+        id,
+      });
       setTasks(tasks.filter((task) => task._id !== id));
       setConfirmDeleteId(null);
     } catch (error) {
-      console.error("Error deleting task:", error);
+      console.log("Error deleting task:", error);
     }
   };
 
   const handleDeleteAll = async () => {
     try {
-      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/tasks`);
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/user/DeleteTask`);
       setTasks([]);
       setConfirmDeleteAll(false);
     } catch (error) {
-      console.error("Error deleting all tasks:", error);
+      console.log("Error deleting all tasks:", error);
+    }
+  };
+
+  const handleUpdate = async (updatedTask) => {
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/user/UpdateTask`,
+        updatedTask
+      );
+      setTasks((prev) =>
+        prev.map((t) =>
+          t._id === updatedTask.id ? { ...t, ...updatedTask } : t
+        )
+      );
+      setUpdateModal(false);
+      setTaskToUpdate(null);
+    } catch (error) {
+      console.log("Error updating task:", error);
     }
   };
 
@@ -80,6 +103,15 @@ const Home = () => {
                     Read
                   </button>
                   <button
+                    onClick={() => {
+                      setTaskToUpdate(task);
+                      setUpdateModal(true);
+                    }}
+                    className="bg-yellow-500 text-white px-3 py-2 rounded-xl hover:bg-yellow-600 transition"
+                  >
+                    Update
+                  </button>
+                  <button
                     onClick={() => setConfirmDeleteId(task._id)}
                     className="bg-red-500 text-white px-3 py-2 rounded-xl hover:bg-red-600 transition"
                   >
@@ -123,6 +155,26 @@ const Home = () => {
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {updateModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 animate-fadeIn overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl w-11/12 max-w-2xl my-10 relative">
+            <button
+              onClick={() => {
+                setUpdateModal(false);
+                setTaskToUpdate(null);
+              }}
+              className="absolute top-3 right-3 bg-gray-700 text-white px-3 py-1 rounded-full hover:bg-gray-800"
+            >
+              ✕
+            </button>
+            <UpdateTask
+              onUpdate={handleUpdate}
+              existingTask={taskToUpdate}
+            />
           </div>
         </div>
       )}
