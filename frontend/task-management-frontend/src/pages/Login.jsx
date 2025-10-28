@@ -1,19 +1,59 @@
+import axios from "axios";
 import { useState } from "react";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState("")
+  const [successMsg, setSuccessMsg] = useState("")
+  const [errorMsg, setErrorMsg] = useState("")
+  const [loading, setLoading] = useState(false)
+  let apiBaseURL = import.meta.env.VITE_API_BASE_URL
 
-  const handleSubmit = async () => {
-    let response = await axios.post(
-      `${process.env.REACT_APP_API_BASE_URL}/auth/login`,
-      {
-        username: username,
-        password: password,
-      }
-    );
-  };
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setErrorMsg("")
+    setSuccessMsg("")
+
+
+    if(!username.trim() || !password.trim()) {
+        setErrorMsg("Please Enter both Username and Password")
+    }
+    try {
+        setLoading(true)
+        let response = await axios.post(
+            `${apiBaseURL}/auth/login`,
+            {
+                username: username,
+                password: password,
+            });
+
+            if(response.data.success) {
+                setSuccessMsg('Login Successful')
+                if(rememberMe) {
+                    localStorage.setItem('username', username)
+                    localStorage.setItem('password', password)
+                }
+                else {
+                    localStorage.removeItem('username')
+                    localStorage.removeItem('password')
+                }
+                setTimeout(() => {
+                    window.location.href = '/create-task'
+                }, 1200)
+            }
+            else {
+                setErrorMsg(response.data.message || "Invalid credentials");
+            }
+        }   
+        catch(error) {
+            setErrorMsg('Error while logging', error || 'Something went wrong')
+            console.log(error)
+        }
+        finally {
+            setLoading(false)
+        }
+    };
 
   return (
     <>
@@ -51,6 +91,8 @@ const Login = () => {
               </label>
               <input
                 type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter username"
                 className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition"
               />
@@ -62,6 +104,8 @@ const Login = () => {
               </label>
               <input
                 type="password"
+                value = {password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
                 className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition"
               />
@@ -78,12 +122,18 @@ const Login = () => {
                 Remember me
               </label>
             </div>
+            {errorMsg && <p className="text-red-500 text-sm text-center">{errorMsg}</p>}
+            {successMsg && <p className="text-green-600 text-sm text-center">{successMsg}</p>}
 
             <button
-              type="submit"
-              className="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold text-lg hover:bg-indigo-700 transition duration-200 shadow-md"
-            >
-              Login
+                type="submit"
+                disabled={loading}
+                className={`w-full py-3 rounded-xl font-semibold text-lg transition duration-200 shadow-md ${
+                loading
+                    ? "bg-indigo-400 cursor-not-allowed text-white"
+                    : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                }`}>
+                {loading ? "Logging in..." : "Login"}
             </button>
           </form>
         </div>
