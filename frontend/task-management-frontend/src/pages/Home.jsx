@@ -12,13 +12,15 @@ const Home = () => {
   const [updateModal, setUpdateModal] = useState(false);
   const [taskToUpdate, setTaskToUpdate] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
+  let apiBaseURL = import.meta.env.VITE_API_BASE_URL
+
 
   const fetchTasks = async () => {
     try {
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
       const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/user/ReadTask`,
+        `${apiBaseURL}/user/ReadTask`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
