@@ -67,7 +67,7 @@ const Home = () => {
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
       await axios.delete(
-        `${import.meta.env.VITE_API_BASE_URL}/user/DeleteTask`,
+        `${import.meta.env.VITE_API_BASE_URL}/user/DeleteAllTask`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
