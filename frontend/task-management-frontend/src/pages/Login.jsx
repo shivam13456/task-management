@@ -30,6 +30,8 @@ const Login = () => {
 
             if(response.data.success) {
                 setSuccessMsg('Login Successful')
+                localStorage.setItem("isLoggedIn", true)
+                localStorage.setItem("token", response.data.user.token)
                 if(rememberMe) {
                     localStorage.setItem('username', username)
                     localStorage.setItem('password', password)

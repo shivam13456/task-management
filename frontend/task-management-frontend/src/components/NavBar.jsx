@@ -1,8 +1,15 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    navigate("/");
+  };
 
   return (
     <nav className="bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg">
@@ -17,6 +24,7 @@ const Navbar = () => {
           <div className="hidden md:flex space-x-6">
             <Link to="/home" className="text-white hover:text-gray-200 transition duration-200">Home</Link>
             <Link to="/create-task" className="text-white hover:text-gray-200 transition duration-200">Create</Link>
+            <button onClick={handleLogout} className="text-white hover:text-gray-200 transition duration-200">Logout</button>
           </div>
 
           <div className="md:hidden flex items-center">
@@ -39,6 +47,7 @@ const Navbar = () => {
         <div className="md:hidden bg-indigo-700">
           <Link to="/home" className="block px-4 py-2 text-white hover:bg-indigo-500" onClick={() => setMenuOpen(false)}>Home</Link>
           <Link to="/create-task" className="block px-4 py-2 text-white hover:bg-indigo-500" onClick={() => setMenuOpen(false)}>Create</Link>
+          <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-white hover:bg-indigo-500">Logout</button>
         </div>
       )}
     </nav>

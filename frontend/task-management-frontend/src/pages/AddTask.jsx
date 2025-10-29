@@ -51,7 +51,12 @@ const handleGenerateAI = async () => {
     }
 
     try {
-      const response = await axios.post(`${apiBaseURL}/user/create`, task)
+      const token = localStorage.getItem('token')
+      const response = await axios.post(`${apiBaseURL}/user/create`, task, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
 
       if(response.data.success) {
         setSuccess(response.data.message)
