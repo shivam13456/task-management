@@ -23,6 +23,7 @@ const Home = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      console.log("response", import.meta.env.VITE_API_BASE_URL)
       setTasks(response.data.data);
       setFilteredTasks(response.data.data);
     } catch (error) {
