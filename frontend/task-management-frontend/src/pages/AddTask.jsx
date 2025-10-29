@@ -1,4 +1,5 @@
 import axios from "axios";
+import { OpenAI } from "openai/client.js";
 import { useState } from "react";
 
 const TodoCreate = ({ onCreate }) => {
@@ -7,22 +8,32 @@ const TodoCreate = ({ onCreate }) => {
   const [dueDate, setDueDate] = useState("");
   const [status, setStatus] = useState("todo");
   const [autoDesc, setAutoDesc] = useState(false);
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
-  let apiBaseURL = import.meta.env.VITE_API_BASE_URL
+  const [loadingAI, setLoadingAI] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const apiBaseURL = import.meta.env.VITE_API_BASE_URL;
 
 
-  function handleGenerateAI() {
-    const samples = [
-      "Short focused task: finish the homepage UI with responsive layout and accessible controls.",
-      "Add validation and error messages to the signup form, then test on mobile and desktop.",
-      "Refactor the task list: split into components, add pagination and local filters.",
-      "Write unit tests for the utilities and add a small e2e test for login flow."
-    ];
-    const sample = samples[Math.floor(Math.random() * samples.length)];
-    setDescription(sample);
-    setAutoDesc(true);
+  
+const handleGenerateAI = async () => {
+  if (!title.trim()) {
+    setError("Enter a title before generating description.");
+    return;
   }
+  setError("");
+  setLoadingAI(true);
+  try {
+    const res = await axios.post(`${apiBaseURL}/openai/GenerateDescription`, { title });
+    setDescription(res.data.description);
+    setAutoDesc(true);
+  } catch (err) {
+    setError("AI generation failed. Try again.");
+  } finally {
+    setLoadingAI(false);
+  }
+};
+
+
 
   const handleSubmit = async(e) => {
     e.preventDefault();
@@ -38,7 +49,6 @@ const TodoCreate = ({ onCreate }) => {
       status,
       createdAt: new Date().toISOString()
     }
-    console.log("Task:", task)
 
     try {
       const response = await axios.post(`${apiBaseURL}/user/create`, task)
