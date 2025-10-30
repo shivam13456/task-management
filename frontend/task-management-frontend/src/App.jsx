@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Login from "./pages/Login";
+import Signup from "./pages/SignUp";
 import TodoCreate from "./pages/AddTask";
 import Navbar from "./components/NavBar";
 import UpdateTask from "./pages/UpdateTask";
@@ -9,13 +10,15 @@ import "./App.css";
 
 function AppContent() {
   const location = useLocation();
-  const isLoginPage = location.pathname === "/";
+  const hideNavbar =
+    location.pathname === "/" || location.pathname === "/signup";
 
   return (
     <>
-      {!isLoginPage && <Navbar />}
+      {!hideNavbar && <Navbar />}
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
         <Route
           path="/home"
           element={
@@ -40,6 +43,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+        <Route path="*" element={<Login />} />
       </Routes>
     </>
   );

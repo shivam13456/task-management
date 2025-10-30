@@ -8,18 +8,24 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTask, setSelectedTask] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
   const [updateModal, setUpdateModal] = useState(false);
   const [taskToUpdate, setTaskToUpdate] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
-  let apiBaseURL = import.meta.env.VITE_API_BASE_URL;
+  let apiBaseURL = import.meta.env.VITE_API_BASE_URL
+
 
   const fetchTasks = async () => {
     try {
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
-      const response = await axios.get(`${apiBaseURL}/user/ReadTask`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `${apiBaseURL}/user/ReadTask`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log("response", import.meta.env.VITE_API_BASE_URL)
       setTasks(response.data.data);
       setFilteredTasks(response.data.data);
     } catch (error) {
@@ -53,6 +59,24 @@ const Home = () => {
       setConfirmDeleteId(null);
     } catch (error) {
       console.log("Error deleting task:", error);
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    try {
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+      await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/user/DeleteAllTask`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setTasks([]);
+      setFilteredTasks([]);
+      setConfirmDeleteAll(false);
+    } catch (error) {
+      console.log("Error deleting all tasks:", error);
     }
   };
 
@@ -104,6 +128,12 @@ const Home = () => {
               onChange={handleSearch}
               className="border border-gray-300 rounded-xl px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
+            <button
+              onClick={() => setConfirmDeleteAll(true)}
+              className="bg-red-500 text-white px-4 py-2 rounded-xl hover:bg-red-600 transition w-full sm:w-auto"
+            >
+              Delete All
+            </button>
           </div>
         </div>
 
@@ -205,24 +235,34 @@ const Home = () => {
         </div>
       )}
 
-      {confirmDeleteId && (
+      {(confirmDeleteId || confirmDeleteAll) && (
         <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 p-4">
           <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-xs text-center">
             <h2 className="text-xl font-bold mb-4 text-gray-800">
-              Delete Task?
+              {confirmDeleteAll ? "Delete All Tasks?" : "Delete Task?"}
             </h2>
             <p className="text-gray-600 mb-6">
-              Are you sure you want to delete this task?
+              {confirmDeleteAll
+                ? "This will permanently remove all your tasks."
+                : "Are you sure you want to delete this task?"}
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-3">
               <button
-                onClick={() => handleDelete(confirmDeleteId)}
+                onClick={() =>
+                  confirmDeleteAll
+                    ? handleDeleteAll()
+                    : handleDelete(confirmDeleteId)
+                }
                 className="bg-red-500 text-white px-4 py-2 rounded-xl hover:bg-red-600 transition w-full sm:w-auto"
               >
                 Yes, Delete
               </button>
               <button
-                onClick={() => setConfirmDeleteId(null)}
+                onClick={() =>
+                  confirmDeleteAll
+                    ? setConfirmDeleteAll(false)
+                    : setConfirmDeleteId(null)
+                }
                 className="bg-gray-500 text-white px-4 py-2 rounded-xl hover:bg-gray-600 transition w-full sm:w-auto"
               >
                 Cancel

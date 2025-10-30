@@ -23,7 +23,7 @@ const Signup = () => {
 
     try {
       setLoading(true);
-      const response = await axios.post(`${apiBaseURL}/auth/signup`, {
+      const response = await axios.post(`${apiBaseURL}/auth/SignUp`, {
         username,
         password,
       });
@@ -37,7 +37,7 @@ const Signup = () => {
         setErrorMsg(response.data.message || "Signup failed, try again!");
       }
     } catch (error) {
-      console.error(error);
+      console.log(error);
       setErrorMsg("Error while signing up. Please try again!");
     } finally {
       setLoading(false);

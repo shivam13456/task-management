@@ -43,7 +43,7 @@ const Login = () => {
         }
 
         setTimeout(() => {
-          window.location.href = "/create-task";
+          window.location.href = "/home";
         }, 1200);
       } else {
         setErrorMsg(response.data.message || "Invalid credentials");
